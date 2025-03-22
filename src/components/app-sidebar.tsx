@@ -19,34 +19,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useNavigate, useSearchParams } from "react-router"
+import { useNotes } from "@/hooks/use-notes"
+import { Note } from "@/lib/types"
+import { timeAgo } from "@/lib/utils"
 
 // This is sample data
-type Note = {
-  id: string,
-  title: string,
-  content: string,
-  created_at: string
-}
-const notesData: Note[] = [
-  {
-    id: "1",
-    title: "title",
-    content: "content loremidedede dededddddd dedede deded ed e de d ed ededededede dededededed edededede dedededede d",
-    created_at: "2025-03-20 15:30:00"
-  },
-  {
-    id: "2",
-    title: "title 2",
-    content: "content",
-    created_at: "2025-01-20 15:30:00"
-  },
-  {
-    id: "3",
-    title: "title 3",
-    content: "content",
-    created_at: "2024-03-20 15:30:00"
-  }
-]
+
 const data = {
   user: {
     name: "shadcn",
@@ -74,7 +52,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Note: I'm using state to show active item.
   // IRL you should use the url/router.
   const [activeItem, setActiveItem] = React.useState(navMain[0])
-  const [notes, setNotes] = React.useState(notesData)
+  const notesQuery = useNotes()
+
   const { setOpen } = useSidebar()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams();
@@ -126,7 +105,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarContent>
           <SidebarGroup className="px-0">
             <SidebarGroupContent>
-              {notes.map((note) => (
+              {notesQuery.issueQuery.isLoading && 'Loading...'}
+              {notesQuery.issueQuery.error && 'Error'}
+              {notesQuery.issueQuery.data && notesQuery.issueQuery.data.map((note: Note) => (
                 <a
                   onClick={() => {
                     setSearchParams((prev) => {
@@ -138,7 +119,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="flex flex-col items-start gap-2 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
                   <div className="flex w-full items-center gap-2">
-                    <span className="font-medium">{note.title}</span> <span className="ml-auto text-xs">{note.created_at}</span>
+                    <span className="font-medium text-md">{note.title}</span> <span className="ml-auto text-xs">{timeAgo(note.created_at)}</span>
                   </div>
                   <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">{note.content}</span>
                 </a>
