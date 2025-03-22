@@ -22,6 +22,8 @@ import { useNavigate, useSearchParams } from "react-router"
 import { useNotes } from "@/hooks/use-notes"
 import { Note } from "@/lib/types"
 import { timeAgo } from "@/lib/utils"
+import Button from "./common/Button"
+import { FaPlus } from "react-icons/fa";
 
 // This is sample data
 
@@ -101,6 +103,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Sidebar collapsible="none" className="flex-1 flex">
         <SidebarHeader className="gap-3.5 border-b p-4">
           <SidebarInput placeholder="Type to search..." />
+
+          <Button variant="primary" icon={<FaPlus />}>New note</Button>
+
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup className="px-0">
