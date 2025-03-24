@@ -1,42 +1,36 @@
-import { updateNote } from "@/api/notes.api";
 import RichTextEditor from "@/components/rich-text-editor";
 import { useNotes } from "@/hooks/use-notes";
 import { Note } from "@/lib/types";
-import { useRef } from "react";
-import { useSearchParams } from "react-router";
+import { useParams } from 'react-router-dom';
 
 const ActiveNotes = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    const noteIdParam = searchParams.get("id")
+    const { noteId } = useParams();
 
     const notesQuery = useNotes();
-    const note: Note = notesQuery.issueQuery.data?.find((note: Note) => note.id === noteIdParam)
 
-    // Debouncing
-    const lastChange = useRef<NodeJS.Timeout | null>(null)
-    const handleUpdate = ({ editor }: { editor: any }) => {
-        if (lastChange.current) {
-            clearTimeout(lastChange.current)
+    if (notesQuery.issueQuery.isLoading) {
+        return <p>Retrieving data...</p>
+    }
+
+    if (!noteId) {
+        // escenario en que no hayan notas previas
+        const numNotes = notesQuery.issueQuery.data.length
+        if (numNotes > 0) {
+            const lastNote: Note = notesQuery.issueQuery.data[notesQuery.issueQuery.data.length - 1]
+            return <RichTextEditor key={lastNote.id} noteId={lastNote.id} content={lastNote.content} />
+        } else {
+            return <p>Press here to create a new note!</p>
         }
 
-        lastChange.current = setTimeout(() => {
-            // remove the current ref (the timeref doesnt dissapear automatically)
-            lastChange.current = null
-
-            const newContent = editor.getHTML()
-            updateNote({ ...note, content: newContent })
-        }, 500)
-    }
-
-    if (!noteIdParam) {
-        return <p>No note selected!</p>
-    } else if (!note) {
-        return <p>Note does not exist!</p>
     } else {
-        return (
-            <RichTextEditor key={note.id} content={note.content} handleUpdate={handleUpdate} />
-        )
+        const note: Note = notesQuery.issueQuery.data?.find((note: Note) => note.id === noteId)
+        if (!note) {
+            return <p>Note does not exist!</p>
+        } else {
+            return (
+                <RichTextEditor key={note.id} noteId={note.id} content={note.content} />
+            )
+        }
     }
 }
-
 export default ActiveNotes

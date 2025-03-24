@@ -20,6 +20,10 @@ export const router = createBrowserRouter([
                 element: <ActiveNotes />
             },
             {
+                path: 'notes/:noteId?',
+                element: <ActiveNotes />
+            },
+            {
                 path: "archived",
                 element: <ArchivedNotes />
             }

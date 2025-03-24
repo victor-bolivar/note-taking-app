@@ -5,6 +5,18 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function getTitleFromNote(html: string) {
+  const match = html.match(/<h1>(.*?)<\/h1>/i);
+  return match ? match[1] : "";
+}
+
+export function getContentFromNote(html: string) {
+  // TODO checkout how Evernote does this
+  let text = html.replace(/<h1>.*?<\/h1>/i, ""); // Remove first <h1> occurrence
+  text = text.replace(/<[^>]+>/g, "").trim(); // Remove all tags and extra spaces
+  return text.slice(0, 300); // Truncate to 300 characters
+}
+
 export function timeAgo(timestamp: string): string {
   const date = new Date(timestamp);
   const now = new Date();

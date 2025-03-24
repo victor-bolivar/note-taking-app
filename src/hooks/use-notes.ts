@@ -1,16 +1,22 @@
 import { getNotes } from '@/api/notes.api';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-export const
-    useNotes = () => {
-        const issueQuery = useQuery({
-            queryKey: ['issues'],
-            queryFn: () => getNotes(),
-            staleTime: 1000 * 60,
-        });
+export const useNotes = () => {
+    const queryClient = useQueryClient(); // Get the query client instance
 
-        // You could also just return { data, isFetching, error }
-        return {
-            issueQuery,
-        };
+    const issueQuery = useQuery({
+        queryKey: ['issues'],
+        queryFn: () => getNotes(),
+        staleTime: 1000 * 60,
+    });
+
+    // Function to invalidate and refetch
+    const refetchNotes = () => {
+        queryClient.invalidateQueries({ queryKey: ['issues'] });
     };
+
+    return {
+        issueQuery,
+        refetchNotes, // Expose this function
+    };
+};

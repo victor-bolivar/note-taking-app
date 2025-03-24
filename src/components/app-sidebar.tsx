@@ -4,11 +4,9 @@ import * as React from "react"
 import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
-import { Label } from "@/components/ui/label"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -18,12 +16,13 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useNavigate, useSearchParams } from "react-router"
+import { useNavigate } from "react-router"
 import { useNotes } from "@/hooks/use-notes"
 import { Note } from "@/lib/types"
-import { timeAgo } from "@/lib/utils"
+import { getContentFromNote, getTitleFromNote, timeAgo } from "@/lib/utils"
 import Button from "./common/Button"
 import { FaPlus } from "react-icons/fa";
+import { createNewNote } from "@/api/notes.api"
 
 // This is sample data
 
@@ -58,7 +57,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const { setOpen } = useSidebar()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleCreateNewNote = async () => {
+    const newNote: Note = await createNewNote()
+    await notesQuery.refetchNotes()
+    navigate(`/notes/${newNote.id}`)
+  }
 
   return (
     <Sidebar
@@ -104,7 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarHeader className="gap-3.5 border-b p-4">
           <SidebarInput placeholder="Type to search..." />
 
-          <Button variant="primary" icon={<FaPlus />}>New note</Button>
+          <Button variant="primary" icon={<FaPlus />} onClick={handleCreateNewNote}>New note</Button>
 
         </SidebarHeader>
         <SidebarContent>
@@ -115,18 +119,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               {notesQuery.issueQuery.data && notesQuery.issueQuery.data.map((note: Note) => (
                 <a
                   onClick={() => {
-                    setSearchParams((prev) => {
-                      prev.set("id", note.id);
-                      return prev;
-                    });
+                    navigate(`/notes/${note.id}`)
                   }}
                   key={note.id}
                   className="flex flex-col items-start gap-2 whitespace-nowrap border-b p-4 text-sm leading-tight last:border-b-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
                   <div className="flex w-full items-center gap-2">
-                    <span className="font-medium text-md">{note.title}</span> <span className="ml-auto text-xs">{timeAgo(note.created_at)}</span>
+                    <span className="font-medium text-md">{getTitleFromNote(note.content)}</span> <span className="ml-auto text-xs">{timeAgo(note.created_at)}</span>
                   </div>
-                  <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">{note.content}</span>
+                  <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">{getContentFromNote(note.content)}</span>
                 </a>
               ))}
             </SidebarGroupContent>

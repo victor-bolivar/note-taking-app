@@ -12,6 +12,9 @@ import { GoListOrdered, GoListUnordered } from "react-icons/go";
 import { RiBold, RiItalic, RiStrikethrough, RiCodeAiFill, RiCodeBlock, RiParagraph, RiH1, RiH2, RiH3 } from "react-icons/ri";
 import Document from '@tiptap/extension-document'
 import Placeholder from '@tiptap/extension-placeholder'
+import { updateNote } from '@/api/notes.api'
+import { useRef } from 'react'
+import { useNotes } from '@/hooks/use-notes'
 
 const CustomDocument = Document.extend({
     content: 'heading block*',
@@ -115,6 +118,7 @@ const extensions = [
     Color.configure({ types: [TextStyle.name, ListItem.name] }),
     TextStyle.configure({ types: [ListItem.name] }),
     StarterKit.configure({
+        document: false,
         bulletList: {
             keepMarks: true,
             keepAttributes: false, // TODO : Making this as `false` becase marks are not preserved when I try to preserve attrs, awaiting a bit of help
@@ -127,10 +131,29 @@ const extensions = [
 ]
 
 type RichTextEditorParams = {
+    noteId: string
     content: string,
-    handleUpdate: ({ editor }: { editor: any; }) => void
 }
-const RichTextEditor = ({ content, handleUpdate }: RichTextEditorParams) => {
+const RichTextEditor = ({ noteId, content }: RichTextEditorParams) => {
+    const notesQuery = useNotes();
+
+    const lastChange = useRef<NodeJS.Timeout | null>(null)
+    const handleUpdate = ({ editor }: { editor: any }) => {
+        if (lastChange.current) {
+            clearTimeout(lastChange.current)
+        }
+
+        lastChange.current = setTimeout(() => {
+            // remove the current ref (the timeref doesnt dissapear automatically)
+            lastChange.current = null
+
+            const newContent = editor.getHTML()
+            updateNote({ id: noteId, content: newContent })
+
+            notesQuery.issueQuery.refetch() // TODO this should trigger a refetch in the sidebar notes inmediatly, currently it updates it after two edits
+        }, 500)
+    }
+
     return (
         <EditorProvider slotBefore={<MenuBar />} extensions={extensions} content={content} autofocus={'end'} onUpdate={handleUpdate} >
         </EditorProvider>

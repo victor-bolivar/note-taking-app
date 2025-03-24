@@ -27,3 +27,14 @@ export const updateNote = async (note: Partial<Note> & { id: string }) => {
         throw error;
     }
 };
+
+export const createNewNote = async () => {
+    try {
+        const newNote = { title: "", content: "" };
+        const response = await notesApi.post("/notes", newNote);
+        return response.data;
+    } catch (error) {
+        console.error("Error creating new note:", error);
+        throw error;
+    }
+};
