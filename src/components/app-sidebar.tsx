@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
+import { ArchiveX, File } from "lucide-react"
 
 import { NavUser } from "./nav-user"
 import {
@@ -115,7 +115,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               {notesQuery.issueQuery.isLoading && 'Loading...'}
               {notesQuery.issueQuery.error && 'Error'}
-              {notesQuery.issueQuery.data && notesQuery.issueQuery.data.map((note: Note) => (
+              {notesQuery.issueQuery.data && notesQuery.issueQuery.data.sort((noteA: Note, noteB: Note) =>
+                new Date(noteB.created_at).getTime() - new Date(noteA.created_at).getTime()
+              ).map((note: Note) => (
                 <a
                   onClick={() => {
                     navigate(`/notes/${note.id}`)
