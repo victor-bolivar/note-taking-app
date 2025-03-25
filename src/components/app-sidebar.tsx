@@ -60,7 +60,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleCreateNewNote = async () => {
     const newNote: Note = await createNewNote()
-    await notesQuery.refetchNotes()
     navigate(`/notes/${newNote.id}`)
   }
 
