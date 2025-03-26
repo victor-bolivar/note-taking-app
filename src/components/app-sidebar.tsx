@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ArchiveX, File } from "lucide-react"
+import { ArchiveX, Command, File, Inbox, Send, Trash2 } from "lucide-react"
 
 import { NavUser } from "./nav-user"
 import {
@@ -115,8 +115,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarGroupContent>
               {notesQuery.issueQuery.isLoading && 'Loading...'}
               {notesQuery.issueQuery.error && 'Error'}
-              {notesQuery.issueQuery.data && notesQuery.issueQuery.data.sort((noteA: Note, noteB: Note) =>
-                new Date(noteB.created_at).getTime() - new Date(noteA.created_at).getTime()
+              {notesQuery.issueQuery.data && notesQuery.issueQuery.data.sort((a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
               ).map((note: Note) => (
                 <a
                   onClick={() => {
@@ -128,6 +128,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <div className="flex w-full items-center gap-2">
                     <span className="font-medium text-md">{getTitleFromNote(note.content)}</span> <span className="ml-auto text-xs">{timeAgo(note.created_at)}</span>
                   </div>
+                  <p>{note.created_at}</p>
                   <span className="line-clamp-2 w-[260px] whitespace-break-spaces text-xs">{getContentFromNote(note.content)}</span>
                 </a>
               ))}

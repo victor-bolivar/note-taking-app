@@ -1,18 +1,18 @@
 import './styles.scss'
 
 import { updateNote } from '@/api/notes.api'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNotes } from '@/hooks/use-notes'
-import { EditorProvider } from '@tiptap/react'
+import { EditorProvider, useCurrentEditor } from '@tiptap/react'
 import { extensions } from './extensions'
 import MenuBar from './MenuBar'
+import { Note } from '@/lib/types'
 
 type RichTextEditorParams = {
-    noteId: string
-    content: string,
+    note: Note
 }
 
-const RichTextEditor = ({ noteId, content }: RichTextEditorParams) => {
+const RichTextEditor = ({ note }: RichTextEditorParams) => {
     const notesQuery = useNotes();
 
     const lastChange = useRef<NodeJS.Timeout | null>(null)
@@ -25,14 +25,14 @@ const RichTextEditor = ({ noteId, content }: RichTextEditorParams) => {
             lastChange.current = null;
 
             const newContent = editor.getHTML();
-            await updateNote({ id: noteId, content: newContent });
+            await updateNote({ id: note.id, content: newContent });
 
             await notesQuery.issueQuery.refetch(); // Ensures the sidebar updates immediately
         }, 500);
     };
 
     return (
-        <EditorProvider slotBefore={<MenuBar />} extensions={extensions} content={content} autofocus={'end'} onUpdate={handleUpdate} >
+        <EditorProvider slotBefore={<MenuBar note={note} />} extensions={extensions} autofocus={'end'} onUpdate={handleUpdate} >
         </EditorProvider>
     )
 }

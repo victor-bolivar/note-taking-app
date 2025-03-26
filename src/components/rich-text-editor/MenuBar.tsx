@@ -3,13 +3,27 @@ import { GoHorizontalRule } from "react-icons/go";
 import { MdFormatQuote } from "react-icons/md";
 import { GoListOrdered, GoListUnordered } from "react-icons/go";
 import { RiBold, RiItalic, RiStrikethrough, RiCodeAiFill, RiCodeBlock, RiParagraph, RiH1, RiH2, RiH3 } from "react-icons/ri";
+import { useEffect } from 'react';
+import { Note } from '@/lib/types';
 
-const MenuBar = () => {
+type MenuBarProps = {
+    note: Note
+}
+
+const MenuBar = ({ note }: MenuBarProps) => {
     const { editor } = useCurrentEditor();
 
     if (!editor) {
         return null;
     }
+
+    // The RichTextEditor has problems when re-rendering a new one wehn using a key={noteId}
+    // Instead, we'll just update the content without having to destroy and generate a new <RichTextEditor/>
+    useEffect(() => {
+        if (editor) {
+            editor.commands.setContent(note.content)
+        }
+    }, [note])
 
     const menuOptions = <>
         {[
